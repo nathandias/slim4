@@ -1,5 +1,6 @@
 <?php
 
+use App\Auth\Auth;
 use App\Controllers\HomeController;
 use App\Controllers\UserController;
 use DI\Container;
@@ -17,6 +18,11 @@ $container->set('db', function() {
     return new PDO('sqlite:../db.sqlite3');
 });
 
+$container->set('auth', function() {
+    return new Auth();
+
+});
+
 $container->set(HomeController::class, function($container) {
     return new HomeController(
         $container->get('view'),
@@ -29,3 +35,4 @@ $container->set(UserController::class, function($container) {
         $container->get('db'),
     );
 });
+

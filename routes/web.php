@@ -2,12 +2,48 @@
 
 use App\Controllers\HomeController;
 use App\Controllers\UserController;
+use App\Middleware\RedirectIfAuthenticated;
+use App\Middleware\RedirectIfNotAuthenticated;
+
 //use Slim\Routing\RouteCollectorProxy;
 
 
-$app->get('/', HomeController::class . ':index')->setName('home');
+$app->get('/', HomeController::class . ':index')
+    ->setName('home');
 
 $app->get('/user/{username}', UserController::class . ':show')->setName('users.show');
+
+$app->group('', function ($route) {
+
+    $route->get('/auth/login', function ($request, $response) {
+        $response->getBody()->write('Sign in');
+    
+        return $response;
+    })->setName('auth.signin');
+    
+    $route->get('/signup', function ($request, $response) {
+        $response->getBody()->write('Sign up');
+    
+        return $response;
+    })->setName('auth.signup');
+
+})->add(new RedirectIfAuthenticated(
+    $container->get('auth')
+));
+
+
+$app->get('/dashboard', function ($request, $response) {
+    $response->getBody()->write('Dashboard');
+
+    return $response;
+})
+    ->add(new RedirectIfNotAuthenticated(
+        $app->getRouteCollector()->getRouteParser(),
+        $container->get('auth')
+    ));
+
+
+    // ->add(new GuestMiddleware());
 
 
 // $app->get('/', function(Request $request, Response $response, array $args) {
